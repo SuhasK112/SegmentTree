@@ -1,0 +1,132 @@
+#include <iostream>
+using namespace std;
+
+#define N 8
+
+
+int segmentTree[4*N];
+int lazy[4*N]={0};
+int Arr[8];
+
+void build(int s,int e,int node_num)
+{
+    if(s==e)
+    {  // cout <<node_num<<" "<<s<<" "<<e<<" "<<Arr[s]<<endl;
+        segmentTree[node_num]=Arr[s];
+        return;
+        
+    }
+    int m=(s+e)/2;
+    
+    build(s,m,node_num*2);
+    build(m+1,e,node_num*2+1);
+    segmentTree[node_num]=segmentTree[node_num*2]+segmentTree[node_num*2+1];
+    return;
+}
+//////////////////////////////////////////////////////////////////LAZY
+
+void lazy_update(int s,int e,int node_num)
+{
+    segmentTree[node_num] = (e-s+1) * lazy[node_num];
+    if(e>s)
+        lazy[node_num*2] = lazy[node_num*2+1] = lazy[node_num];
+    lazy[node_num] = 0;
+}
+
+void set_lazy(int s,int e,int new_val,int node_num)
+{
+    if(e>s)
+    {
+        lazy[node_num*2] = lazy[node_num*2+1] = new_val;
+    }
+}
+
+
+void point_update(int p, int newval, int s, int e, int node_num)
+{
+    if(lazy[node_num]>0)
+        lazy_update(s,e,node_num);
+    if(s==e)
+    {
+        segmentTree[node_num] = newval;
+        return;
+    }
+    int m = (s+e)/2;
+    if(p<=m)
+        point_update(p,newval,s,m,node_num*2);
+    else
+        point_update(p,newval,m+1,e,node_num*2+1);
+    segmentTree[node_num] = segmentTree[node_num*2] + segmentTree[node_num*2+1];
+}
+
+void range_update(int l,int r,int new_val,int s,int e,int node_num)
+{
+    if(lazy[node_num]>0)
+        lazy_update(s,e,node_num);
+    if(s>r || e<l)
+        return;
+    else if(s>=l && e<= r)
+        segmentTree[node_num] = (e-s+1)*new_val , set_lazy(s,e,new_val,node_num);
+    else
+    {
+        int m = (s+e)/2;
+        range_update(l,r,new_val,s,m,node_num*2);
+        range_update(l,r,new_val,m+1,e,node_num*2+1);
+        segmentTree[node_num] = segmentTree[node_num*2] + segmentTree[node_num*2+1];
+    }
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////
+
+
+
+int query(int l,int r,int s,int e,int node_num)
+{
+    if(lazy[node_num]>0)
+        lazy_update(s,e,node_num);
+    if(s>r || e<l)
+        return 0;
+    else if(s>=l && e<=r)
+        return segmentTree[node_num];
+    else
+    {
+        int m = (s+e)/2;
+        return query(l,r,s,m,node_num*2) + query(l,r,m+1,e,node_num*2+1);
+    }
+}
+
+
+
+
+int main()
+{
+ 
+    Arr[0]=0;
+    Arr[1]=1;
+    Arr[2]=2;
+    Arr[3]=3;
+    Arr[4]=4;
+    Arr[5]=5;
+    Arr[6]=6;
+    Arr[7]=7;
+    
+    
+    build(0, 7, 1);
+  
+    
+   // for(int i=1;i<=15;i++)cout <<segmentTree[i]<<" ";
+    
+    cout <<query(0, 7, 0, 7, 1);
+    point_update(0, 8, 0, 7, 1);
+    cout <<endl<<"newval after updateing 0 with 8\n";
+    cout <<query(0, 7, 0, 7, 1);
+    point_update(0, 0, 0, 7, 1);//update 0 to 0
+      cout <<endl<<"update 0 to 0 newval after updateing 0 with 8 and using range update\n";
+    range_update(0, 0, 8, 0,8 , 1);
+    cout <<query(0, 7, 0, 7, 1);
+    
+    
+    
+
+}
