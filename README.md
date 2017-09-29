@@ -1,2 +1,2 @@
 # SegmentTree
-Segment Tree Implementation
+Segment Tree Implementation with and without lazy propagation
