@@ -1,0 +1,2 @@
+# SegmentTree
+Segment Tree Implementation
